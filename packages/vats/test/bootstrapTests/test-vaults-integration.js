@@ -31,6 +31,17 @@ const likePayouts = (collateral, minted) => ({
   },
 });
 
+/**
+ * TODO BUG: Everywhere this is used, we should use `Infinity` instead. However,
+ * the fact that this matches the current value shows that something is exposing
+ * the marshal-encoded form rather than the number it encodes. Further,
+ * it is the marshal-encoded form from the deprecated qclass encoding
+ * rather than smallcaps.
+ */
+const ShouldBeInfinity = harden({
+  '@qclass': 'Infinity',
+});
+
 const makeDefaultTestContext = async t => {
   console.time('DefaultTestContext');
   const swingsetTestKit = await makeSwingsetTestKit(t);
@@ -133,7 +144,7 @@ test('adjust balances', async t => {
     updated: 'offerStatus',
     status: {
       id: 'adjust',
-      numWantsSatisfied: 1,
+      numWantsSatisfied: ShouldBeInfinity,
     },
   });
 });
@@ -191,7 +202,8 @@ test('close vault', async t => {
     updated: 'offerStatus',
     status: {
       id: 'close-insufficient',
-      numWantsSatisfied: 1, // trivially true because proposal `want` was empty.
+      // XXX there were no wants. Zoe treats as Infinitely satisfied
+      numWantsSatisfied: ShouldBeInfinity,
       error: `Error: ${message}`,
     },
   });
@@ -213,6 +225,7 @@ test('close vault', async t => {
       result: 'your loan is closed, thank you for your business',
       // funds are returned
       payouts: likePayouts(giveCollateral, 0),
+      numWantsSatisfied: ShouldBeInfinity,
     },
   });
 });
