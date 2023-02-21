@@ -1,4 +1,4 @@
-import { mustMatch, keyEQ } from '@agoric/store';
+import { mustMatch, keyEQ, M } from '@agoric/store';
 import { E } from '@endo/eventual-send';
 import { makePromiseKit } from '@endo/promise-kit';
 import { AssetKind } from '@agoric/ertp';
@@ -205,6 +205,12 @@ export const depositToSeat = async (zcf, recipientSeat, amounts, payments) => {
   const invitation = zcf.makeInvitation(
     reallocateAfterDeposit,
     'temporary seat for deposit',
+    undefined,
+    harden({
+      give: M.any(),
+      want: {},
+      exit: { onDemand: null },
+    }),
   );
   const proposal = harden({ give: amounts });
   harden(payments);

@@ -1,6 +1,6 @@
 // @jessie-check
 
-import { AmountMath, AssetKind } from '@agoric/ertp';
+import { AmountMath, AmountShape, AssetKind } from '@agoric/ertp';
 import { bindAllMethods, makeTracer } from '@agoric/internal';
 import { makePublishKit } from '@agoric/notifier';
 import { M, matches } from '@agoric/store';
@@ -10,7 +10,7 @@ import {
   atomicRearrange,
 } from '@agoric/zoe/src/contractSupport/index.js';
 import { ceilMultiplyBy } from '@agoric/zoe/src/contractSupport/ratio.js';
-import { addSubtract, assertOnlyKeys } from '../contractSupport.js';
+import { addSubtract } from '../contractSupport.js';
 import { calculateCurrentDebt, reverseInterest } from '../interest-math.js';
 import { ManagerKW as KW } from './constants.js';
 
@@ -75,6 +75,8 @@ const initState = (zcf, startSeat, manager) => {
   const emptyDebt = AmountMath.makeEmpty(debtBrand);
 
   const initialDebt = (() => {
+    // What `makeInvitation` call does this correspond to?
+    // TODO use a proposalShape there and kill the `assertProposalShape` here.
     assertProposalShape(startSeat, {
       give: { [KW.Attestation]: null },
       want: { [KW.Debt]: null },
@@ -252,7 +254,6 @@ const helperBehavior = {
     assert(state.open);
 
     const proposal = clientSeat.getProposal();
-    assertOnlyKeys(proposal, [KW.Attestation, KW.Debt]);
 
     const debt = pot.getCurrentDebt();
     const collateral = helper.getCollateralAllocated(vaultSeat);
@@ -336,10 +337,6 @@ const helperBehavior = {
     const { debtBrand, manager, vaultSeat, zcf } = state;
     const { helper, pot } = facets;
     assert(state.open);
-    assertProposalShape(seat, {
-      give: { [KW.Debt]: null },
-      want: { [KW.Attestation]: null },
-    });
 
     const currentDebt = pot.getCurrentDebt();
     const {
@@ -378,9 +375,33 @@ const potBehavior = {
     const { zcf } = state;
     const { helper } = facets;
     assert(state.open);
+
+    // Or should this be more like the AdjustBalancesProposalShape in
+    // vaultFactory, that allows both records to have both properties?
+    const AdjustBalancesProposalShape = M.or(
+      M.splitRecord({
+        give: {
+          Attestation: AmountShape, // TODO brand specific AmountShape
+        },
+        want: {
+          Debt: AmountShape, // TODO brand specific AmountShape
+        },
+      }),
+      M.splitRecord({
+        give: {
+          Debt: AmountShape, // TODO brand specific AmountShape
+        },
+        want: {
+          Attestation: AmountShape, // TODO brand specific AmountShape
+        },
+      }),
+    );
+
     return zcf.makeInvitation(
       seat => helper.adjustBalancesHook(seat),
       'AdjustBalances',
+      undefined,
+      AdjustBalancesProposalShape,
     );
   },
   /** @param {MethodContext} context */
@@ -388,7 +409,22 @@ const potBehavior = {
     const { zcf } = state;
     const { helper } = facets;
     assert(state.open);
-    return zcf.makeInvitation(seat => helper.closeHook(seat), 'CloseVault');
+
+    const CloseProposalShape = M.splitRecord({
+      give: {
+        [KW.Debt]: AmountShape, // TODO brand specific AmountShape
+      },
+      want: {
+        [KW.Attestation]: AmountShape, // TODO brand specific AmountShape
+      },
+    });
+
+    return zcf.makeInvitation(
+      seat => helper.closeHook(seat),
+      'CloseVault',
+      undefined,
+      CloseProposalShape,
+    );
   },
   /**
    * The actual current debt, including accrued interest.

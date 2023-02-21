@@ -191,6 +191,42 @@ const VaultStateShape = harden({
 export const prepareVault = (baggage, makeRecorderKit, zcf) => {
   const makeVaultKit = prepareVaultKit(baggage, makeRecorderKit);
 
+  const AdjustBalancesProposalShape = M.splitRecord({
+    give: M.splitRecord(
+      {},
+      {
+        Collateral: AmountShape, // TODO brand specific AmountShape
+        Minted: AmountShape, // TODO brand specific AmountShape
+      },
+      {},
+    ),
+    want: M.splitRecord(
+      {},
+      {
+        Collateral: AmountShape, // TODO brand specific AmountShape
+        Minted: AmountShape, // TODO brand specific AmountShape
+      },
+      {},
+    ),
+  });
+
+  const CloseProposalShape = M.splitRecord({
+    give: M.splitRecord(
+      {},
+      {
+        Minted: AmountShape, // TODO brand specific AmountShape
+      },
+      {},
+    ),
+    want: M.splitRecord(
+      {},
+      {
+        Collateral: AmountShape, // TODO brand specific AmountShape
+      },
+      {},
+    ),
+  });
+
   const maker = prepareExoClassKit(
     baggage,
     'Vault',
