@@ -2,6 +2,7 @@
 
 import { AmountMath } from '@agoric/ertp';
 import { handleParamGovernance, ParamTypes } from '@agoric/governance';
+import { M } from '@agoric/store';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import { E, Far } from '@endo/far';
 import { makeCollectFeesInvitation } from '../collectFees.js';
@@ -105,9 +106,11 @@ export const start = async (
   /** @type {ZCFMint<'nat'>} */
   const debtMint = await zcf.registerFeeMint(KW.Debt, feeMintAccess);
   const { brand: debtBrand } = debtMint.getIssuerRecord();
+  const debtAmountShape = debtBrand.getAmountShape();
 
   const att = await makeAttestationFacets(zcf, stakeBrand, lienBridge);
   const attestBrand = await E(att.publicFacet).getBrand();
+  const attestAmountShape = attestBrand.getAmountShape();
 
   const { augmentPublicFacet, makeGovernorFacet, params } =
     await handleParamGovernance(
@@ -177,6 +180,15 @@ export const start = async (
     { timerService, chargingPeriod, recordingPeriod, startTimeStamp },
   );
 
+  const StakeFactoryCloseProposalShape = M.splitRecord({
+    give: {
+      [KW.Debt]: debtAmountShape,
+    },
+    want: {
+      [KW.Attestation]: attestAmountShape,
+    },
+  });
+
   /**
    * @param {ZCFSeat} seat
    */
@@ -194,16 +206,35 @@ export const start = async (
             'AdjustBalances',
           ),
         CloseVault: () =>
-          zcf.makeInvitation(seatx => helper.closeHook(seatx), 'CloseVault'),
+          zcf.makeInvitation(
+            seatx => helper.closeHook(seatx),
+            'CloseVault',
+            undefined,
+            StakeFactoryCloseProposalShape,
+          ),
       }),
       vault: pot,
     });
   };
 
+  const MakeStakeFactoryProposalShape = M.splitRecord({
+    give: {
+      [KW.Attestation]: attestAmountShape,
+    },
+    want: {
+      [KW.Debt]: debtAmountShape,
+    },
+  });
+
   const publicFacet = augmentPublicFacet(
     harden({
       makeLoanInvitation: () =>
-        zcf.makeInvitation(offerHandler, 'make stakeFactory'),
+        zcf.makeInvitation(
+          offerHandler,
+          'make stakeFactory',
+          undefined,
+          MakeStakeFactoryProposalShape,
+        ),
       makeReturnAttInvitation: att.publicFacet.makeReturnAttInvitation,
     }),
   );

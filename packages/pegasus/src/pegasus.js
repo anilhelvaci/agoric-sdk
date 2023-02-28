@@ -19,9 +19,9 @@ import { makeCourierMaker, getCourierPK } from './courier.js';
 const DEFAULT_DENOM_TRANSFORMER = IBCSourceTraceDenomTransformer;
 const DEFAULT_TRANSFER_PROTOCOL = ICS20TransferProtocol;
 
-const TRANSFER_PROPOSAL_SHAPE = M.splitRecord({
+const TransferProposalShape = M.splitRecord({
   give: {
-    Transfer: AmountShape, // TODO brand specific AmountShape
+    Transfer: AmountShape, // TODO get amount shape from brand
   },
 });
 
@@ -486,7 +486,7 @@ const makePegasus = (zcf, board, namesByAddress) => {
         offerHandler,
         `pegasus ${sendDenom} transfer`,
         undefined,
-        TRANSFER_PROPOSAL_SHAPE,
+        TransferProposalShape,
       );
     },
   });

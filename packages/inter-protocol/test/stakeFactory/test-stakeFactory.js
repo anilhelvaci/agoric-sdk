@@ -442,7 +442,8 @@ test('extra offer keywords are rejected', async t => {
     harden({ [KW.Attestation]: attPmt }),
   );
   await t.throwsAsync(E(seat).getOfferResult(), {
-    message: /Pony.*did not match/,
+    message:
+      /^"make stakeFactory" proposal: want: .* - Must not have unexpected properties: \["Pony"\]$/,
   });
 });
 

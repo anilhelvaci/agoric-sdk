@@ -5,10 +5,7 @@ import { bindAllMethods, makeTracer } from '@agoric/internal';
 import { makePublishKit } from '@agoric/notifier';
 import { M, matches } from '@agoric/store';
 import { defineKindMulti } from '@agoric/vat-data';
-import {
-  assertProposalShape,
-  atomicRearrange,
-} from '@agoric/zoe/src/contractSupport/index.js';
+import { atomicRearrange } from '@agoric/zoe/src/contractSupport/index.js';
 import { ceilMultiplyBy } from '@agoric/zoe/src/contractSupport/ratio.js';
 import { addSubtract } from '../contractSupport.js';
 import { calculateCurrentDebt, reverseInterest } from '../interest-math.js';
@@ -75,12 +72,6 @@ const initState = (zcf, startSeat, manager) => {
   const emptyDebt = AmountMath.makeEmpty(debtBrand);
 
   const initialDebt = (() => {
-    // What `makeInvitation` call does this correspond to?
-    // TODO use a proposalShape there and kill the `assertProposalShape` here.
-    assertProposalShape(startSeat, {
-      give: { [KW.Attestation]: null },
-      want: { [KW.Debt]: null },
-    });
     const {
       give: { [KW.Attestation]: attestationGiven },
       want: { [KW.Debt]: runWanted },
@@ -376,26 +367,25 @@ const potBehavior = {
     const { helper } = facets;
     assert(state.open);
 
-    // Or should this be more like the AdjustBalancesProposalShape in
-    // vaultFactory, that allows both records to have both properties?
-    const AdjustBalancesProposalShape = M.or(
-      M.splitRecord({
-        give: {
-          Attestation: AmountShape, // TODO brand specific AmountShape
+    // Adjustments must be able to specify just the 'give' or the 'want'.
+    const AdjustBalancesProposalShape = M.splitRecord({
+      give: M.splitRecord(
+        {},
+        {
+          Attestation: AmountShape, // TODO get amount shape from brand
+          Debt: AmountShape, // TODO get amount shape from brand
         },
-        want: {
-          Debt: AmountShape, // TODO brand specific AmountShape
+        {},
+      ),
+      want: M.splitRecord(
+        {},
+        {
+          Attestation: AmountShape, // TODO get amount shape from brand
+          Debt: AmountShape, // TODO get amount shape from brand
         },
-      }),
-      M.splitRecord({
-        give: {
-          Debt: AmountShape, // TODO brand specific AmountShape
-        },
-        want: {
-          Attestation: AmountShape, // TODO brand specific AmountShape
-        },
-      }),
-    );
+        {},
+      ),
+    });
 
     return zcf.makeInvitation(
       seat => helper.adjustBalancesHook(seat),
@@ -412,10 +402,10 @@ const potBehavior = {
 
     const CloseProposalShape = M.splitRecord({
       give: {
-        [KW.Debt]: AmountShape, // TODO brand specific AmountShape
+        [KW.Debt]: AmountShape, // TODO get amount shape from brand
       },
       want: {
-        [KW.Attestation]: AmountShape, // TODO brand specific AmountShape
+        [KW.Attestation]: AmountShape, // TODO get amount shape from brand
       },
     });
 

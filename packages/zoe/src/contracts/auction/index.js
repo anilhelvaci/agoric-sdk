@@ -117,19 +117,19 @@ const start = zcf => {
 
   const BidProposalShape = M.splitRecord({
     give: {
-      Bid: AmountShape, // TODO brand specific AmountShape
+      Bid: AmountShape, // TODO get amount shape from brand
     },
     want: {
-      Asset: AmountShape, // TODO brand specific AmountShape
+      Asset: AmountShape, // TODO get amount shape from brand
     },
   });
 
   const SellProposalShape = M.splitRecord({
     give: {
-      Asset: AmountShape, // TODO brand specific AmountShape
+      Asset: AmountShape, // TODO get amount shape from brand
     },
     want: {
-      Ask: AmountShape, // TODO brand specific AmountShape
+      Ask: AmountShape, // TODO get amount shape from brand
     },
     exit: {
       // The auction is not over until the deadline according to the
