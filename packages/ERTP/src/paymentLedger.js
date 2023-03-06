@@ -86,7 +86,11 @@ export const preparePaymentLedger = (
   optShutdownWithFailure = undefined,
 ) => {
   /** @type {Brand<K>} */
-  // @ts-expect-error XXX callWhen
+  // Should be
+  // at-ts-expect-error XXX callWhen
+  // but ran into the usual disagreement between local lint and CI
+  // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+  // @ts-ignore
   const brand = issuerZone.exo(`${name} brand`, BrandI, {
     isMyIssuer(allegedIssuer) {
       // BrandI delays calling this method until `allegedIssuer` is a Remotable
@@ -317,7 +321,11 @@ export const preparePaymentLedger = (
   );
 
   /** @type {Issuer<K>} */
-  // @ts-expect-error cast due to callWhen discrepancy
+  // Should be
+  // at-ts-expect-error cast due to callWhen discrepancy
+  // but ran into the usual disagreement between local lint and CI
+  // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+  // @ts-ignore
   const issuer = issuerZone.exo(`${name} issuer`, IssuerI, {
     getBrand() {
       return brand;
@@ -444,7 +452,11 @@ export const preparePaymentLedger = (
       return issuer;
     },
     mintPayment(newAmount) {
-      // @ts-expect-error checked cast
+      // Should be
+      // at-ts-expect-error checked cast
+      // but ran into the usual disagreement between local lint and CI
+      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+      // @ts-ignore
       newAmount = coerce(newAmount);
       mustMatch(newAmount, amountShape, 'minted amount');
       // `rawPayment` is not associated with any recovery set, and
