@@ -219,14 +219,6 @@ export const makeStartInstance = (
     const contractBundleCap = bundle || bundleCap;
     assert(contractBundleCap);
 
-    if (privateArgs !== undefined) {
-      const passStyle = passStyleOf(privateArgs);
-      passStyle === 'copyRecord' ||
-        Fail`privateArgs must be a pass-by-copy record, but instead was a ${q(
-          passStyle,
-        )}: ${privateArgs}`;
-    }
-
     const instanceHandle = makeInstanceHandle();
 
     const instanceBaggage = makeScalarBigMapStore('instanceBaggage', {
