@@ -43,7 +43,7 @@ test('storage keys', async t => {
     t,
     managerA,
     'asset',
-    'mockChainStorageRoot.vaultFactory.manager0',
+    'mockChainStorageRoot.vaultFactory.managers.manager0',
     [
       'compoundedInterest',
       'interestRate',
@@ -55,7 +55,7 @@ test('storage keys', async t => {
     t,
     managerA,
     'metrics',
-    'mockChainStorageRoot.vaultFactory.manager0.metrics',
+    'mockChainStorageRoot.vaultFactory.managers.manager0.metrics',
     [
       'numActiveVaults',
       'numLiquidatingVaults',
@@ -75,7 +75,7 @@ test('storage keys', async t => {
         collateralBrand: aeth.brand,
       }),
     ),
-    'mockChainStorageRoot.vaultFactory.manager0.governance',
+    'mockChainStorageRoot.vaultFactory.managers.manager0.governance',
   );
 
   // Second manager
@@ -84,13 +84,13 @@ test('storage keys', async t => {
     t,
     E(managerC).getPublicFacet(),
     'asset',
-    'mockChainStorageRoot.vaultFactory.manager1',
+    'mockChainStorageRoot.vaultFactory.managers.manager1',
   );
   await assertTopicPathData(
     t,
     E(managerC).getPublicFacet(),
     'metrics',
-    'mockChainStorageRoot.vaultFactory.manager1.metrics',
+    'mockChainStorageRoot.vaultFactory.managers.manager1.metrics',
   );
   t.is(
     await subscriptionKey(
@@ -98,21 +98,21 @@ test('storage keys', async t => {
         collateralBrand: chit.brand,
       }),
     ),
-    'mockChainStorageRoot.vaultFactory.manager1.governance',
+    'mockChainStorageRoot.vaultFactory.managers.manager1.governance',
   );
 
   // First aeth vault
   const vda1 = await d.makeVaultDriver(aeth.make(1000n), run.make(50n));
   t.is(
     await E.get(vda1.getVaultSubscriber()).storagePath,
-    'mockChainStorageRoot.vaultFactory.manager0.vaults.vault0',
+    'mockChainStorageRoot.vaultFactory.managers.manager0.vaults.vault0',
   );
 
   // Second aeth vault
   const vda2 = await d.makeVaultDriver(aeth.make(1000n), run.make(50n));
   t.is(
     await E.get(vda2.getVaultSubscriber()).storagePath,
-    'mockChainStorageRoot.vaultFactory.manager0.vaults.vault1',
+    'mockChainStorageRoot.vaultFactory.managers.manager0.vaults.vault1',
   );
 });
 
@@ -127,7 +127,7 @@ test('quotes storage', async t => {
   const storedNotifier = await E(aethManager).getQuotes();
   t.is(
     await E(storedNotifier).getPath(),
-    'mockChainStorageRoot.vaultFactory.manager0.quotes',
+    'mockChainStorageRoot.vaultFactory.managers.manager0.quotes',
   );
 
   let latest = await E(storedNotifier).getUpdateSince();

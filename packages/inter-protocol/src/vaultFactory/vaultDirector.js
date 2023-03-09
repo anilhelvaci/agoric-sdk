@@ -124,6 +124,8 @@ export const prepareVaultDirector = (
     ),
   });
 
+  const managersNode = E(storageNode).makeChildNode('managers');
+
   const managerBaggages = provideChildBaggage(baggage, 'Vault Manager baggage');
 
   /** @type {import('../reserve/assetReserve.js').ShortfallReporter} */
@@ -283,8 +285,7 @@ export const prepareVaultDirector = (
 
           // counter to be incremented at end of addVaultType
           const managerId = `manager${state.managerCounter}`;
-          const managerStorageNode =
-            storageNode && E(storageNode).makeChildNode(managerId);
+          const managerStorageNode = E(managersNode).makeChildNode(managerId);
 
           /** a powerful object; can modify parameters */
           const vaultParamManager = makeVaultParamManager(
