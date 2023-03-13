@@ -134,8 +134,10 @@
  *   issuer: |
  *     TokenKeyword | 'Invitation' | 'Attestation' | 'AUSD',
  *   installation: |
- *     'centralSupply' | 'mintHolder' |
+ *     'mintHolder' |
  *     'walletFactory' | 'provisionPool' | 'auctioneer' |
+ *     'mintHolder' |
+ *     'walletFactory' | 'provisionPool' | 'auction' |
  *     'feeDistributor' |
  *     'contractGovernor' | 'committee' | 'noActionElectorate' | 'binaryVoteCounter' |
  *     'VaultFactory' | 'liquidate' | 'stakeFactory' |
@@ -212,7 +214,6 @@
  *   clientCreator: ClientCreator,
  *   coreEvalBridgeHandler: import('../types.js').BridgeHandler,
  *   feeMintAccess: FeeMintAccess,
- *   initialSupply: Payment<'nat'>,
  *   lienBridge: unknown,
  *   mints: MintsVat,
  *   namesByAddress: NameHub,
