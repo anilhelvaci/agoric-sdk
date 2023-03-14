@@ -1,5 +1,4 @@
 import { E } from '@endo/eventual-send';
-import { passStyleOf } from '@endo/marshal';
 import {
   M,
   makeScalarBigMapStore,
@@ -15,7 +14,7 @@ import { AdminFacetI, InstanceAdminI } from '../typeGuards.js';
 /** @typedef {import('@agoric/vat-data').Baggage} Baggage */
 /** @typedef { import('@agoric/swingset-vat').BundleCap} BundleCap */
 
-const { Fail, quote: q } = assert;
+const { Fail } = assert;
 
 /**
  * @param {Pick<ZoeStorageManager, 'makeZoeInstanceStorageManager' | 'unwrapInstallation'>} startInstanceAccess
