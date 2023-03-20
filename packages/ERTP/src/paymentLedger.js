@@ -69,7 +69,7 @@ const amountShapeFromElementShape = (brand, assetKind, elementShape) => {
  * payments. All minting and transfer authority originates here.
  *
  * @template {AssetKind} K
- * @param {Zone} issuerZone
+ * @param {import('@agoric/zone').Zone} issuerZone
  * @param {string} name
  * @param {K} assetKind
  * @param {DisplayInfo<K>} displayInfo
@@ -434,16 +434,27 @@ export const preparePaymentLedger = (
   });
 
   /**
+   * @template {any} V
+   * @param {Zone} zone
+   * @param {string} key
+   * @param {(k: string) => V} makeValue
+   * @returns {V}
+   */
+  const provideFromZone = (zone, key, makeValue) => {
+    const map = zone.mapStore(`singleton_${key}_store`);
+    return provide(map, key, makeValue);
+  };
+  harden(provideFromZone);
+
+  /**
    * Provides for the recovery of newly minted but not-yet-deposited payments.
    *
    * Because the `mintRecoveryPurse` is placed in baggage, even if the
    * caller of `makeIssuerKit` drops it on the floor, it can still be
    * recovered in an emergency upgrade.
-   *
-   * @type {Purse<K>}
    */
-  const mintRecoveryPurse = provide(issuerBaggage, 'mintRecoveryPurse', () =>
-    makeEmptyPurse(),
+  const mintRecoveryPurse = /** @type {Purse<K>} */ (
+    provideFromZone(issuerZone, 'mintRecoveryPurse', () => makeEmptyPurse())
   );
 
   /** @type {Mint<K>} */
