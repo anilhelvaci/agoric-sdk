@@ -222,13 +222,15 @@ harden(makeStorageNodeChild);
 /**
  *
  * @param {import('@endo/far').ERef<StorageNode>} storageNode
- * @param {import('@endo/far').ERef<Marshaller>} marshaller
+ * @param {import('@endo/far').ERef<Marshaller & {
+ *   serializeAndStringify: (value: unknown) => string
+ * }>} marshaller
  * @returns {(value: unknown) => Promise<void>}
  */
 export const makeSerializeToStorage = (storageNode, marshaller) => {
   return async value => {
-    const marshalled = await E(marshaller).serialize(value);
-    const serialized = JSON.stringify(marshalled);
-    return E(storageNode).setValue(serialized);
+    const serializedP = E(marshaller).serializeAndStringify(value);
+    // @ts-expect-error M.callWhen
+    return E(storageNode).setValue(serializedP);
   };
 };
