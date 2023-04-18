@@ -9,6 +9,8 @@ import { kunser } from '@agoric/swingset-liveslots/test/kmarshal.js';
 import { loadSwingsetConfigFile } from '@agoric/swingset-vat';
 import { makeQueue } from '@endo/stream';
 import { promises as fs } from 'fs';
+import { dir as tmpDir } from 'tmp';
+import { makeSlogSender, tryFlushSlogSender } from '@agoric/telemetry';
 import { resolve as importMetaResolve } from 'import-meta-resolve';
 import { boardSlottingMarshaller } from '../../tools/board-utils.js';
 
@@ -303,7 +305,35 @@ export const makeSwingsetTestKit = async (
 ) => {
   console.time('makeSwingsetTestKit');
   const configPath = await getNodeTestVaultsConfig(bundleDir, specifier);
-  const { kernelStorage, hostStorage } = initSwingStore();
+
+  const { path: dbDir, cleanup: dbDirCleanup } = await new Promise(
+    (resolve, reject) =>
+      tmpDir(
+        {
+          prefix: `agd-state-bootstrap-test-`,
+          keep: true,
+          unsafeCleanup: true,
+        },
+        (err, path, cleanup) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ path, cleanup });
+          }
+        },
+      ),
+  );
+  const { kernelStorage, hostStorage } = initSwingStore(dbDir);
+  // After to not get deleted by reset
+  const slogSender = await makeSlogSender({
+    stateDir: dbDir,
+    env: {
+      SLOGSENDER_AGENT: 'process',
+      SLOGFILE: `${dbDir}/chain.slog`,
+      ...process.env,
+    },
+    serviceName: 'bootstrap-test',
+  });
 
   const storage = makeFakeStorageKit('bootstrapTests');
 
@@ -366,16 +396,27 @@ export const makeSwingsetTestKit = async (
     configPath,
     {},
     {},
-    { debugName: 'TESTBOOT' },
+    { debugName: 'TESTBOOT', slogSender },
   );
   console.timeLog('makeSwingsetTestKit', 'buildSwingset');
 
-  const runUtils = makeRunUtils(controller, t.log);
+  const flushSlog = tryFlushSlogSender.bind(null, slogSender);
+  const runAndFlush = async (...args) =>
+    controller.run(...args).finally(flushSlog);
+
+  const runUtils = makeRunUtils({ ...controller, run: runAndFlush }, t.log);
 
   console.timeEnd('makeSwingsetTestKit');
 
-  const shutdown = async () =>
-    Promise.all([controller.shutdown(), hostStorage.close()]).then(() => {});
+  const shutdown = async () => {
+    await hostStorage.commit();
+    await Promise.all([
+      controller.shutdown(),
+      hostStorage.close(),
+      tryFlushSlogSender(slogSender),
+      // dbDirCleanup(),
+    ]);
+  };
 
   return { controller, runUtils, storage, shutdown };
 };
