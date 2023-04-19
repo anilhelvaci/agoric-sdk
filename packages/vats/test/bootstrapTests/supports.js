@@ -409,11 +409,11 @@ export const makeSwingsetTestKit = async (
   console.timeEnd('makeSwingsetTestKit');
 
   const shutdown = async () => {
-    await hostStorage.commit();
+    await Promise.all([hostStorage.commit(), tryFlushSlogSender(slogSender)]);
     await Promise.all([
       controller.shutdown(),
       hostStorage.close(),
-      tryFlushSlogSender(slogSender),
+      slogSender?.shutdown?.(),
       // dbDirCleanup(),
     ]);
   };
