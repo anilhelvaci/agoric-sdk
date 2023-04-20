@@ -63,7 +63,7 @@ const { Fail } = assert;
  * @param {{feeMintAccess: FeeMintAccess, initialPoserInvitation: Invitation, storageNode: StorageNode, marshaller: Marshaller}} privateArgs
  * @param {Baggage} baggage
  */
-export const start = async (zcf, privateArgs, baggage) => {
+export const prepare = async (zcf, privateArgs, baggage) => {
   const { anchorBrand, anchorPerMinted } = zcf.getTerms();
   console.log('PSM Starting', anchorBrand, anchorPerMinted);
 
@@ -309,4 +309,4 @@ export const start = async (zcf, privateArgs, baggage) => {
   });
 };
 
-/** @typedef {Awaited<ReturnType<typeof start>>['publicFacet']} PsmPublicFacet */
+/** @typedef {Awaited<ReturnType<typeof prepare>>['publicFacet']} PsmPublicFacet */
