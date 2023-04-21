@@ -15,6 +15,8 @@ import {
   ceilMultiplyBy,
   floorDivideBy,
   floorMultiplyBy,
+  provideAll,
+  provideEmptySeat,
 } from '@agoric/zoe/src/contractSupport/index.js';
 import { E } from '@endo/eventual-send';
 
@@ -101,10 +103,17 @@ export const prepare = async (zcf, privateArgs, baggage) => {
   const { anchorBrand, anchorPerMinted } = zcf.getTerms();
   console.log('PSM Starting', anchorBrand, anchorPerMinted);
 
+  console.log('About to registerFeeMint', privateArgs);
+
+  // this errors from liveslots: no kind info for 21 ( o+d21/1 ); check deserialize preceeding kind definitions
   const stableMint = await zcf.registerFeeMint(
     'Minted',
     privateArgs.feeMintAccess,
   );
+  // Trying to get from baggage doesn't help:
+  // const { stableMint } = await provideAll(baggage, {
+  //   stableMint: () => zcf.registerFeeMint('Minted', privateArgs.feeMintAccess),
+  // });
   const { brand: stableBrand } = stableMint.getIssuerRecord();
   (anchorPerMinted.numerator.brand === anchorBrand &&
     anchorPerMinted.denominator.brand === stableBrand) ||
@@ -129,13 +138,9 @@ export const prepare = async (zcf, privateArgs, baggage) => {
       privateArgs.marshaller,
     );
 
-  const provideEmptyZcfSeat = name => {
-    return provide(baggage, name, () => zcf.makeEmptySeatKit().zcfSeat);
-  };
-
-  const anchorPool = provideEmptyZcfSeat('anchorPoolSeat');
-  const feePool = provideEmptyZcfSeat('feePoolSeat');
-  const stage = provideEmptyZcfSeat('stageSeat');
+  const anchorPool = provideEmptySeat(zcf, baggage, 'anchorPoolSeat');
+  const feePool = provideEmptySeat(zcf, baggage, 'feePoolSeat');
+  const stage = provideEmptySeat(zcf, baggage, 'stageSeat');
 
   let mintedPoolBalance = provide(baggage, 'mintedPoolBalance', () =>
     AmountMath.makeEmpty(stableBrand),
