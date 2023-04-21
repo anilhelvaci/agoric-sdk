@@ -1,26 +1,28 @@
+import '@agoric/governance/exported.js';
 import '@agoric/zoe/exported.js';
 import '@agoric/zoe/src/contracts/exported.js';
-import '@agoric/governance/exported.js';
 
-import { E } from '@endo/eventual-send';
-import {
-  ceilMultiplyBy,
-  floorDivideBy,
-  floorMultiplyBy,
-  atomicRearrange,
-} from '@agoric/zoe/src/contractSupport/index.js';
-import { Far } from '@endo/marshal';
+import { AmountMath, AmountShape, BrandShape, RatioShape } from '@agoric/ertp';
 import {
   CONTRACT_ELECTORATE,
   handleParamGovernance,
   ParamTypes,
   publicMixinAPI,
 } from '@agoric/governance';
-import { M, provide, prepareExo } from '@agoric/vat-data';
-import { AmountMath, AmountShape, BrandShape, RatioShape } from '@agoric/ertp';
+import { M, prepareExo, provide } from '@agoric/vat-data';
+import {
+  atomicRearrange,
+  ceilMultiplyBy,
+  floorDivideBy,
+  floorMultiplyBy,
+} from '@agoric/zoe/src/contractSupport/index.js';
+import { E } from '@endo/eventual-send';
 
-import { InvitationShape } from '@agoric/zoe/src/typeGuards.js';
 import { StorageNodeShape } from '@agoric/internal';
+import {
+  AmountKeywordRecordShape,
+  InvitationShape,
+} from '@agoric/zoe/src/typeGuards.js';
 import { makeCollectFeesInvitation } from '../collectFees.js';
 import { makeMetricsPublishKit } from '../contractSupport.js';
 
@@ -114,7 +116,7 @@ export const prepare = async (zcf, privateArgs, baggage) => {
   const emptyStable = AmountMath.makeEmpty(stableBrand);
   const emptyAnchor = AmountMath.makeEmpty(anchorBrand);
 
-  const { publicMixin, makeFarGovernorFacet, params } =
+  const { publicMixin, makeDurableGovernorFacet, params } =
     await handleParamGovernance(
       zcf,
       privateArgs.initialPoserInvitation,
@@ -311,25 +313,27 @@ export const prepare = async (zcf, privateArgs, baggage) => {
     },
   );
 
-
-  // The creator facets are only accessibly to governance and bootstrap,
-  // and so do not need interface protection at this time. Additionally,
-  // all the operations take no arguments and so are largely defensive as is.
-  const limitedCreatorFacet = Far('Parity Stability Module', {
-    getRewardAllocation() {
-      return feePool.getCurrentAllocation();
+  const limitedCreatorFacet = prepareExo(
+    baggage,
+    'PSM machine',
+    M.interface('PSM machine', {
+      getRewardAllocation: M.call().returns(AmountKeywordRecordShape),
+      makeCollectFeesInvitation: M.call().returns(InvitationShape),
+    }),
+    {
+      getRewardAllocation() {
+        return feePool.getCurrentAllocation();
+      },
+      makeCollectFeesInvitation() {
+        return makeCollectFeesInvitation(zcf, feePool, stableBrand, 'Minted');
+      },
     },
-    makeCollectFeesInvitation() {
-      return makeCollectFeesInvitation(
-        zcf,
-        feePool,
-        stableBrand,
-        'Minted',
-      );();
-    },
-  });
+  );
 
-  const governorFacet = makeFarGovernorFacet(limitedCreatorFacet);
+  const { governorFacet } = makeDurableGovernorFacet(
+    baggage,
+    limitedCreatorFacet,
+  );
   return harden({
     creatorFacet: governorFacet,
     publicFacet,

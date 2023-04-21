@@ -75,7 +75,6 @@ test('PSM service upgrade', async t => {
   t.log('create initial version');
   const [buildV1] = await run('buildV1', []);
   t.is(buildV1, 'fulfilled');
-  return;
 
   t.log('smoke test of functionality');
   const [testFunctionality1] = await run('testFunctionality1', []);
