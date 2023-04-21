@@ -21,7 +21,7 @@ import { AmountMath, AmountShape, BrandShape, RatioShape } from '@agoric/ertp';
 
 import { InvitationShape } from '@agoric/zoe/src/typeGuards.js';
 import { StorageNodeShape } from '@agoric/internal';
-import { makeMakeCollectFeesInvitation } from '../collectFees.js';
+import { makeCollectFeesInvitation } from '../collectFees.js';
 import { makeMetricsPublishKit } from '../contractSupport.js';
 
 const { Fail } = assert;
@@ -311,13 +311,6 @@ export const prepare = async (zcf, privateArgs, baggage) => {
     },
   );
 
-  // TODO why does this operation return an object with a single operation?
-  const { makeCollectFeesInvitation } = makeMakeCollectFeesInvitation(
-    zcf,
-    feePool,
-    stableBrand,
-    'Minted',
-  );
 
   // The creator facets are only accessibly to governance and bootstrap,
   // and so do not need interface protection at this time. Additionally,
@@ -327,7 +320,12 @@ export const prepare = async (zcf, privateArgs, baggage) => {
       return feePool.getCurrentAllocation();
     },
     makeCollectFeesInvitation() {
-      return makeCollectFeesInvitation();
+      return makeCollectFeesInvitation(
+        zcf,
+        feePool,
+        stableBrand,
+        'Minted',
+      );();
     },
   });
 
