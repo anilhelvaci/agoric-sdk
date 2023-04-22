@@ -5,6 +5,7 @@
  * golang/cosmos/x/swingset/keeper/keeper.go
  */
 export const ACTION_QUEUE = 'actionQueue';
+export const HIGH_PRIORITY_QUEUE = 'highPriorityQueue';
 export const BEANSOWING = 'beansOwing';
 export const EGRESS = 'egress';
 export const MAILBOX = 'mailbox';
