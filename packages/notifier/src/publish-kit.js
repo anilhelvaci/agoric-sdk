@@ -89,7 +89,7 @@ export const makePublishKit = () => {
   let currentP = tailP;
   const advanceCurrent = (done, value, rejection) => {
     if (tailR === undefined) {
-      throw new Error('Cannot update state after termination.');
+      throw Error('Cannot update state after termination.');
     }
 
     currentPublishCount += 1n;
@@ -97,9 +97,7 @@ export const makePublishKit = () => {
     const resolveCurrent = tailR;
 
     if (done) {
-      tailP = makeQuietRejection(
-        new Error('Cannot read past end of iteration.'),
-      );
+      tailP = makeQuietRejection(Error('Cannot read past end of iteration.'));
       tailR = undefined;
     } else {
       ({ promise: tailP, resolve: tailR } = makePromiseKit());
@@ -134,7 +132,7 @@ export const makePublishKit = () => {
       } else if (publishCount < currentPublishCount) {
         return currentP;
       } else {
-        throw new Error(
+        throw Error(
           'subscribeAfter argument must be a previously-issued publishCount.',
         );
       }
@@ -244,14 +242,12 @@ const provideDurablePublishKitEphemeralData = (state, facets) => {
   if (status === 'failed') {
     newData = {
       currentP: makeQuietRejection(state.value),
-      tailP: makeQuietRejection(
-        new Error('Cannot read past end of iteration.'),
-      ),
+      tailP: makeQuietRejection(Error('Cannot read past end of iteration.')),
       tailR: undefined,
     };
   } else if (status === 'finished') {
     const tailP = makeQuietRejection(
-      new Error('Cannot read past end of iteration.'),
+      Error('Cannot read past end of iteration.'),
     );
     newData = {
       currentP: E.resolve(
@@ -298,7 +294,7 @@ const advanceDurablePublishKit = (context, value, targetStatus = 'live') => {
   const { state, facets } = context;
   const { valueDurability, status } = state;
   if (status !== 'live') {
-    throw new Error('Cannot update state after termination.');
+    throw Error('Cannot update state after termination.');
   }
   const done = targetStatus !== 'live';
   if (done || valueDurability === 'mandatory') {
@@ -314,7 +310,7 @@ const advanceDurablePublishKit = (context, value, targetStatus = 'live') => {
 
   if (done) {
     state.status = targetStatus;
-    tailP = makeQuietRejection(new Error('Cannot read past end of iteration.'));
+    tailP = makeQuietRejection(Error('Cannot read past end of iteration.'));
     tailR = undefined;
   } else {
     ({ promise: tailP, resolve: tailR } = makePromiseKit());
@@ -398,7 +394,7 @@ export const prepareDurablePublishKit = (baggage, kindName) => {
           } else if (publishCount < currentPublishCount) {
             return currentP;
           } else {
-            throw new Error(
+            throw Error(
               'subscribeAfter argument must be a previously-issued publishCount.',
             );
           }
