@@ -16,6 +16,7 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
+	"github.com/Agoric/agoric-sdk/golang/cosmos/ante"
 	"github.com/Agoric/agoric-sdk/golang/cosmos/vm"
 	"github.com/Agoric/agoric-sdk/golang/cosmos/x/swingset/types"
 	vstoragekeeper "github.com/Agoric/agoric-sdk/golang/cosmos/x/vstorage/keeper"
@@ -25,14 +26,15 @@ import (
 // Top-level paths for chain storage should remain synchronized with
 // packages/internal/src/chain-storage-paths.js
 const (
-	StoragePathActionQueue       = "actionQueue"
-	StoragePathHighPriorityQueue = "highPriorityQueue"
-	StoragePathBeansOwing        = "beansOwing"
-	StoragePathEgress            = "egress"
-	StoragePathMailbox           = "mailbox"
-	StoragePathCustom            = "published"
-	StoragePathBundles           = "bundles"
-	StoragePathSwingStore        = "swingStore"
+	StoragePathActionQueue         = "actionQueue"
+	StoragePathHighPriorityQueue   = "highPriorityQueue"
+	StoragePathHighPrioritySenders = "highPrioritySenders"
+	StoragePathBeansOwing          = "beansOwing"
+	StoragePathEgress              = "egress"
+	StoragePathMailbox             = "mailbox"
+	StoragePathCustom              = "published"
+	StoragePathBundles             = "bundles"
+	StoragePathSwingStore          = "swingStore"
 )
 
 // 2 ** 256 - 1
@@ -75,6 +77,7 @@ type Keeper struct {
 }
 
 var _ types.SwingSetKeeper = &Keeper{}
+var _ ante.SwingsetKeeper = &Keeper{}
 
 // NewKeeper creates a new IBC transfer Keeper instance
 func NewKeeper(
@@ -182,6 +185,11 @@ func (k Keeper) queueLength(ctx sdk.Context, queuePath string) (sdk.Int, error) 
 	}
 	// The tail index is exclusive
 	return tail.Sub(head), nil
+}
+
+func (k Keeper) IsHighPriorityAddress(ctx sdk.Context, addr sdk.AccAddress) (bool, error) {
+	path := StoragePathHighPrioritySenders + "." + addr.String()
+	return k.vstorageKeeper.HasEntry(ctx, path), nil
 }
 
 func (k Keeper) InboundQueueLength(ctx sdk.Context) (int32, error) {
