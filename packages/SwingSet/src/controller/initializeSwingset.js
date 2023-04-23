@@ -327,7 +327,7 @@ export async function initializeSwingset(
 
   // Override the worker type if specified by the caller, to avoid having to
   // edit the config just to run everything under a different manager.
-  const defaultManagerType = SWINGSET_WORKER_TYPE || config.defaultManagerType;
+  const defaultManagerType = config.defaultManagerType || SWINGSET_WORKER_TYPE;
   switch (defaultManagerType) {
     case 'local':
     case 'xsnap': // preferred
