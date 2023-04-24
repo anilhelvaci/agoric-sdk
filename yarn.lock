@@ -2773,6 +2773,13 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.1.0.tgz#563539048255bbe1a5f4f586a4a10a1bb737f44a"
   integrity sha512-hf+3bwuBwtXsugA2ULBc95qxrOqP2pOekLz34BJhcAKawt94vfeNyUKpYc0lZQ/3sCP6LqRa7UAdHA7i5UODzQ==
 
+"@opentelemetry/core@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.12.0.tgz#afa32341b794045c54c979d4561de2f8f00d0da9"
+  integrity sha512-4DWYNb3dLs2mSCGl65jY3aEgbvPWSHVQV/dmDWiYeWUrMakZQFcymqZOSUNZO0uDrEJoxMu8O5tZktX6UKFwag==
+  dependencies:
+    "@opentelemetry/semantic-conventions" "1.12.0"
+
 "@opentelemetry/core@1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.6.0.tgz#c55f8ab7496acef7dbd8c4eedef6a4d4a0143c95"
@@ -2818,7 +2825,15 @@
     "@opentelemetry/sdk-metrics" "0.32.0"
     "@opentelemetry/sdk-trace-base" "1.6.0"
 
-"@opentelemetry/resources@1.6.0", "@opentelemetry/resources@^1.6.0":
+"@opentelemetry/resources@1.12.0", "@opentelemetry/resources@^1.6.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-1.12.0.tgz#895394c727dc3e7e51d1d2cc50907ec07a626dca"
+  integrity sha512-gunMKXG0hJrR0LXrqh7BVbziA/+iJBL3ZbXCXO64uY+SrExkwoyJkpiq9l5ismkGF/A20mDEV7tGwh+KyPw00Q==
+  dependencies:
+    "@opentelemetry/core" "1.12.0"
+    "@opentelemetry/semantic-conventions" "1.12.0"
+
+"@opentelemetry/resources@1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-1.6.0.tgz#9756894131b9b0dfbcc0cecb5d4bd040d9c1b09d"
   integrity sha512-07GlHuq72r2rnJugYVdGumviQvfrl8kEPidkZSVoseLVfIjV7nzxxt5/vqs9pK7JItWOrvjRdr/jTBVayFBr/w==
@@ -2836,7 +2851,7 @@
     "@opentelemetry/resources" "1.6.0"
     lodash.merge "4.6.2"
 
-"@opentelemetry/sdk-trace-base@1.6.0", "@opentelemetry/sdk-trace-base@^1.6.0":
+"@opentelemetry/sdk-trace-base@1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.6.0.tgz#8b1511c0b0f3e6015e345f5ed4a683adf03e3e3c"
   integrity sha512-yx/uuzHdT0QNRSEbCgXHc0GONk90uvaFcPGaNowIFSl85rTp4or4uIIMkG7R8ckj8xWjDSjsaztH6yQxoZrl5g==
@@ -2845,7 +2860,21 @@
     "@opentelemetry/resources" "1.6.0"
     "@opentelemetry/semantic-conventions" "1.6.0"
 
-"@opentelemetry/semantic-conventions@1.6.0", "@opentelemetry/semantic-conventions@^1.6.0":
+"@opentelemetry/sdk-trace-base@^1.6.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.12.0.tgz#62b895dbb5900048a85e4899c38fec5585447d4b"
+  integrity sha512-pfCOB3tNDlYVoWuz4D7Ji+Jmy9MHnATWHVpkERdCEiwUGEZ+4IvNPXUcPc37wJVmMpjGLeaWgPPrie0KIpWf1A==
+  dependencies:
+    "@opentelemetry/core" "1.12.0"
+    "@opentelemetry/resources" "1.12.0"
+    "@opentelemetry/semantic-conventions" "1.12.0"
+
+"@opentelemetry/semantic-conventions@1.12.0", "@opentelemetry/semantic-conventions@^1.6.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.12.0.tgz#19c959bdb900986e74939d4227e757aa16936b91"
+  integrity sha512-hO+bdeGOlJwqowUBoZF5LyP3ORUFOP1G0GRv8N45W/cztXbT2ZEXaAzfokRS9Xc9FWmYrDj32mF6SzH6wuoIyA==
+
+"@opentelemetry/semantic-conventions@1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.6.0.tgz#ed410c9eb0070491cff9fe914246ce41f88d6f74"
   integrity sha512-aPfcBeLErM/PPiAuAbNFLN5sNbZLc3KZlar27uohllN8Zs6jJbHyJU1y7cMA6W/zuq+thkaG8mujiS+3iD/FWQ==
@@ -3434,6 +3463,14 @@
     "@typescript-eslint/types" "5.55.0"
     "@typescript-eslint/visitor-keys" "5.55.0"
 
+"@typescript-eslint/scope-manager@5.59.1":
+  version "5.59.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-5.59.1.tgz#8a20222719cebc5198618a5d44113705b51fd7fe"
+  integrity sha512-mau0waO5frJctPuAzcxiNWqJR5Z8V0190FTSqRw1Q4Euop6+zTwHAf8YIXNwDOT29tyUDrQ65jSg9aTU/H0omA==
+  dependencies:
+    "@typescript-eslint/types" "5.59.1"
+    "@typescript-eslint/visitor-keys" "5.59.1"
+
 "@typescript-eslint/type-utils@5.55.0":
   version "5.55.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.55.0.tgz#74bf0233523f874738677bb73cb58094210e01e9"
@@ -3453,6 +3490,11 @@
   version "5.55.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.55.0.tgz#9830f8d3bcbecf59d12f821e5bc6960baaed41fd"
   integrity sha512-M4iRh4AG1ChrOL6Y+mETEKGeDnT7Sparn6fhZ5LtVJF1909D5O4uqK+C5NPbLmpfZ0XIIxCdwzKiijpZUOvOug==
+
+"@typescript-eslint/types@5.59.1":
+  version "5.59.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.59.1.tgz#03f3fedd1c044cb336ebc34cc7855f121991f41d"
+  integrity sha512-dg0ICB+RZwHlysIy/Dh1SP+gnXNzwd/KS0JprD3Lmgmdq+dJAJnUPe1gNG34p0U19HvRlGX733d/KqscrGC1Pg==
 
 "@typescript-eslint/typescript-estree@5.53.0":
   version "5.53.0"
@@ -3480,7 +3522,20 @@
     semver "^7.3.7"
     tsutils "^3.21.0"
 
-"@typescript-eslint/utils@5.55.0", "@typescript-eslint/utils@^5.10.0", "@typescript-eslint/utils@^5.10.2":
+"@typescript-eslint/typescript-estree@5.59.1":
+  version "5.59.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.59.1.tgz#4aa546d27fd0d477c618f0ca00b483f0ec84c43c"
+  integrity sha512-lYLBBOCsFltFy7XVqzX0Ju+Lh3WPIAWxYpmH/Q7ZoqzbscLiCW00LeYCdsUnnfnj29/s1WovXKh2gwCoinHNGA==
+  dependencies:
+    "@typescript-eslint/types" "5.59.1"
+    "@typescript-eslint/visitor-keys" "5.59.1"
+    debug "^4.3.4"
+    globby "^11.1.0"
+    is-glob "^4.0.3"
+    semver "^7.3.7"
+    tsutils "^3.21.0"
+
+"@typescript-eslint/utils@5.55.0", "@typescript-eslint/utils@^5.10.2":
   version "5.55.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.55.0.tgz#34e97322e7ae5b901e7a870aabb01dad90023341"
   integrity sha512-FkW+i2pQKcpDC3AY6DU54yl8Lfl14FVGYDgBTyGKB75cCwV3KpkpTMFi9d9j2WAJ4271LR2HeC5SEWF/CZmmfw==
@@ -3491,6 +3546,20 @@
     "@typescript-eslint/scope-manager" "5.55.0"
     "@typescript-eslint/types" "5.55.0"
     "@typescript-eslint/typescript-estree" "5.55.0"
+    eslint-scope "^5.1.1"
+    semver "^7.3.7"
+
+"@typescript-eslint/utils@^5.10.0":
+  version "5.59.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.59.1.tgz#d89fc758ad23d2157cfae53f0b429bdf15db9473"
+  integrity sha512-MkTe7FE+K1/GxZkP5gRj3rCztg45bEhsd8HYjczBuYm+qFHP5vtZmjx3B0yUCDotceQ4sHgTyz60Ycl225njmA==
+  dependencies:
+    "@eslint-community/eslint-utils" "^4.2.0"
+    "@types/json-schema" "^7.0.9"
+    "@types/semver" "^7.3.12"
+    "@typescript-eslint/scope-manager" "5.59.1"
+    "@typescript-eslint/types" "5.59.1"
+    "@typescript-eslint/typescript-estree" "5.59.1"
     eslint-scope "^5.1.1"
     semver "^7.3.7"
 
@@ -3522,6 +3591,14 @@
   integrity sha512-q2dlHHwWgirKh1D3acnuApXG+VNXpEY5/AwRxDVuEQpxWaB0jCDe0jFMVMALJ3ebSfuOVE8/rMS+9ZOYGg1GWw==
   dependencies:
     "@typescript-eslint/types" "5.55.0"
+    eslint-visitor-keys "^3.3.0"
+
+"@typescript-eslint/visitor-keys@5.59.1":
+  version "5.59.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-5.59.1.tgz#0d96c36efb6560d7fb8eb85de10442c10d8f6058"
+  integrity sha512-6waEYwBTCWryx0VJmP7JaM4FpipLsFl9CvYf2foAE8Qh/Y0s+bxWysciwOs0LTBED4JCaNxTZ5rGadB14M6dwA==
+  dependencies:
+    "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
 "@web/browser-logs@^0.2.1", "@web/browser-logs@^0.2.2":
