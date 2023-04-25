@@ -74,11 +74,6 @@ func (msg MsgDeliverInbound) GetInboundMsgCount() int32 {
 
 // IsHighPriority implements the vm.ControllerAdmissionMsg interface.
 func (msg MsgDeliverInbound) IsHighPriority(ctx sdk.Context, data interface{}) (bool, error) {
-	_, ok := data.(SwingSetKeeper)
-	if !ok {
-		return false, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "data must be a SwingSetKeeper, not a %T", data)
-	}
-
 	return false, nil
 }
 
@@ -145,11 +140,6 @@ func (msg MsgWalletAction) GetInboundMsgCount() int32 {
 
 // IsHighPriority implements the vm.ControllerAdmissionMsg interface.
 func (msg MsgWalletAction) IsHighPriority(ctx sdk.Context, data interface{}) (bool, error) {
-	_, ok := data.(SwingSetKeeper)
-	if !ok {
-		return false, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "data must be a SwingSetKeeper, not a %T", data)
-	}
-
 	return false, nil
 }
 
@@ -286,11 +276,6 @@ func (msg MsgProvision) GetInboundMsgCount() int32 {
 
 // IsHighPriority implements the vm.ControllerAdmissionMsg interface.
 func (msg MsgProvision) IsHighPriority(ctx sdk.Context, data interface{}) (bool, error) {
-	_, ok := data.(SwingSetKeeper)
-	if !ok {
-		return false, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "data must be a SwingSetKeeper, not a %T", data)
-	}
-
 	return false, nil
 }
 
@@ -331,11 +316,6 @@ func (msg MsgInstallBundle) GetInboundMsgCount() int32 {
 
 // IsHighPriority implements the vm.ControllerAdmissionMsg interface.
 func (msg MsgInstallBundle) IsHighPriority(ctx sdk.Context, data interface{}) (bool, error) {
-	_, ok := data.(SwingSetKeeper)
-	if !ok {
-		return false, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "data must be a SwingSetKeeper, not a %T", data)
-	}
-
 	return false, nil
 }
 
