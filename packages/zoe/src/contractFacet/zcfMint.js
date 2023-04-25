@@ -1,18 +1,17 @@
-import { E } from '@endo/eventual-send';
 import { AmountMath } from '@agoric/ertp';
-import {
-  provideDurableSetStore,
-  makeScalarBigMapStore,
-  prepareSingleton,
-  prepareExo,
-  M,
-} from '@agoric/vat-data';
+import { M, prepareExo, prepareExoClass } from '@agoric/vat-data';
+import { E } from '@endo/eventual-send';
 
 import { coerceAmountKeywordRecord } from '../cleanProposal.js';
 import { makeIssuerRecord } from '../issuerRecord.js';
 import { addToAllocation, subtractFromAllocation } from './allocationMath.js';
 
 import '../internal-types.js';
+import {
+  AmountKeywordRecordShape,
+  IssuerRecordShape,
+  SeatShape,
+} from '../typeGuards.js';
 import './internal-types.js';
 import './types.js';
 
@@ -25,45 +24,59 @@ export const makeZCFMintFactory = (
   /** @type { (exit?: undefined) => { zcfSeat: any; userSeat: Promise<UserSeat> }} */ makeEmptySeatKit,
   /** @type {ZcfMintReallocator} */ reallocator,
 ) => {
-  /** @type {SetStore<import('@agoric/vat-data').Baggage>} The set of baggages for zcfMints */
-  const zcfMintBaggageSet = provideDurableSetStore(zcfBaggage, 'baggageSet');
-
   /**
-   * retrieve the state of the zcfMint from the baggage, and create a durable
-   * singleton reflecting that state.
-   *
    * @param {import('@agoric/vat-data').Baggage} zcfMintBaggage
    */
-  const provideDurableZcfMint = zcfMintBaggage => {
-    const keyword = zcfMintBaggage.get('keyword');
-    const zoeMint = zcfMintBaggage.get('zoeMint');
-    const {
-      brand: mintyBrand,
-      issuer: mintyIssuer,
-      displayInfo: mintyDisplayInfo,
-    } = zcfMintBaggage.get('issuerRecord');
-    const mintyIssuerRecord = makeIssuerRecord(
-      mintyBrand,
-      mintyIssuer,
-      mintyDisplayInfo,
-    );
-    recordIssuer(keyword, mintyIssuerRecord);
-
-    const empty = AmountMath.makeEmpty(mintyBrand, mintyDisplayInfo.assetKind);
-    const add = (total, amountToAdd) =>
-      AmountMath.add(total, amountToAdd, mintyBrand);
-
-    return prepareSingleton(
+  const prepareDurableZcfMint = zcfMintBaggage => {
+    return prepareExoClass(
       zcfMintBaggage,
       'zcfMint',
-      /** @type {ZCFMint} */
+      M.interface('ZCFMint', {
+        getIssuerRecord: M.call().returns(IssuerRecordShape),
+        mintGains: M.call(AmountKeywordRecordShape, M.any()).returns(SeatShape),
+        burnLosses: M.call(AmountKeywordRecordShape, M.any()).returns(
+          SeatShape,
+        ),
+      }),
+      (
+        /** @type {string} */ keyword,
+        /** @type {ZoeMint} */ zoeMint,
+        /** @type {IssuerRecord} */ issuerRecord,
+      ) => {
+        const {
+          brand: mintyBrand,
+          issuer: mintyIssuer,
+          displayInfo: mintyDisplayInfo,
+        } = issuerRecord;
+        if (!mintyDisplayInfo) {
+          throw Fail`DurableZcfMint requires display info`;
+        }
+        const mintyIssuerRecord = makeIssuerRecord(
+          mintyBrand,
+          mintyIssuer,
+          mintyDisplayInfo,
+        );
+        recordIssuer(keyword, mintyIssuerRecord);
+
+        const empty = AmountMath.makeEmpty(
+          mintyBrand,
+          mintyDisplayInfo.assetKind,
+        );
+
+        return { empty, keyword, zoeMint, mintyIssuerRecord };
+      },
       {
         getIssuerRecord: () => {
-          return mintyIssuerRecord;
+          return this.state.mintyIssuerRecord;
         },
         /** @type {(gains: Record<string, Amount>, zcfSeat?: ZCFSeat) => ZCFSeat} */
         mintGains: (gains, zcfSeat = makeEmptySeatKit().zcfSeat) => {
+          const { empty, mintyBrand, zoeMint } = this.state;
           gains = coerceAmountKeywordRecord(gains, getAssetKindByBrand);
+          const add = (
+            /** @type {Amount<AssetKind>} */ total,
+            /** @type {Amount<AssetKind>} */ amountToAdd,
+          ) => AmountMath.add(total, amountToAdd, mintyBrand);
           const totalToMint = Object.values(gains).reduce(add, empty);
           !zcfSeat.hasExited() ||
             Fail`zcfSeat must be active to mint gains for the zcfSeat`;
@@ -93,8 +106,16 @@ export const makeZCFMintFactory = (
           reallocator.reallocate(zcfSeat, allocationPlusGains);
           return zcfSeat;
         },
-        burnLosses: (losses, zcfSeat) => {
+        burnLosses: (
+          /** @type {AmountKeywordRecord} */ losses,
+          /** @type {ZCFSeat} */ zcfSeat,
+        ) => {
+          const { empty, mintyBrand, zoeMint } = this.state;
           losses = coerceAmountKeywordRecord(losses, getAssetKindByBrand);
+          const add = (
+            /** @type {Amount<AssetKind>} */ total,
+            /** @type {Amount<AssetKind>} */ amountToAdd,
+          ) => AmountMath.add(total, amountToAdd, mintyBrand);
           const totalToBurn = Object.values(losses).reduce(add, empty);
           !zcfSeat.hasExited() ||
             Fail`zcfSeat must be active to burn losses from the zcfSeat`;
@@ -125,44 +146,31 @@ export const makeZCFMintFactory = (
     );
   };
 
+  const makeZcfMint = prepareDurableZcfMint(zcfBaggage);
+
   const ZCFMintFactoryI = M.interface('ZCFMintFactory', {
     makeZCFMintInternal: M.call(M.string(), M.remotable('ZoeMint')).returns(
       M.promise(),
     ),
   });
 
-  /**
-   * zcfMintFactory has a method makeZCFMintInternal() that takes a keyword and the
-   * promise returned by a makeZoeMint() call. makeZCFMintInternal() creates a new
-   * baggage for the state of the zcfMint, makes a durableZcfMint from that
-   * baggage, and registers that baggage to be revived with the factory.
-   */
+  // TODO refactor zcfMintFactory uses to makeZcfMint directly
   const zcfMintFactory = prepareExo(
     zcfBaggage,
     'zcfMintFactory',
     ZCFMintFactoryI,
     {
+      /**
+       * @param {string} keyword
+       * @param {ZoeMint} zoeMint
+       */
       async makeZCFMintInternal(keyword, zoeMint) {
         const issuerRecord = await E(zoeMint).getIssuerRecord();
 
-        const zcfMintBaggage = makeScalarBigMapStore('zcfMintBaggage', {
-          durable: true,
-        });
-
-        zcfMintBaggage.init('issuerRecord', issuerRecord);
-        zcfMintBaggage.init('keyword', keyword);
-        zcfMintBaggage.init('zoeMint', zoeMint);
-        zcfMintBaggageSet.add(zcfMintBaggage);
-
-        return provideDurableZcfMint(zcfMintBaggage);
+        return makeZcfMint(keyword, zoeMint, issuerRecord);
       },
     },
   );
-
-  for (const zcfMintBaggage of zcfMintBaggageSet.values()) {
-    // call for side-effect of redefining the kinds
-    provideDurableZcfMint(zcfMintBaggage);
-  }
 
   return zcfMintFactory;
 };
