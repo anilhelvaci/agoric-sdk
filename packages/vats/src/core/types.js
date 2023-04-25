@@ -137,7 +137,7 @@
  *     'mintHolder' |
  *     'walletFactory' | 'provisionPool' | 'auctioneer' |
  *     'mintHolder' |
- *     'walletFactory' | 'provisionPool' | 'auction' |
+ *     'walletFactory' | 'provisionPool' |
  *     'feeDistributor' |
  *     'contractGovernor' | 'committee' | 'noActionElectorate' | 'binaryVoteCounter' |
  *     'VaultFactory' | 'liquidate' | 'stakeFactory' |
