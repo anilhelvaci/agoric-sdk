@@ -22,13 +22,13 @@ import { createSeatManager } from './zcfSeat.js';
 import { makeInstanceRecordStorage } from '../instanceRecordStorage.js';
 import { handlePKitWarning } from '../handleWarning.js';
 import { makeOfferHandlerStorage } from './offerHandlerStorage.js';
-import { makeZCFMintFactory } from './zcfMint.js';
 
 import '../internal-types.js';
 import './internal-types.js';
 
 import '@agoric/swingset-vat/src/types-ambient.js';
 import { HandleOfferI, InvitationHandleShape } from '../typeGuards.js';
+import { prepareDurableZcfMint } from './zcfMint.js';
 
 /** @typedef {import('@agoric/ertp').IssuerOptionsRecord} IssuerOptionsRecord */
 
@@ -120,7 +120,12 @@ export const makeZCFZygote = async (
     return { zcfSeat, userSeat: userSeatPromiseKit.promise };
   };
 
-  let zcfMintFactory;
+  const makeDurableZcfMint = prepareDurableZcfMint(
+    zcfBaggage,
+    recordIssuer,
+    getAssetKindByBrand,
+    makeEmptySeatKit,
+  );
 
   /**
    * @template {AssetKind} [K='nat']
@@ -145,7 +150,8 @@ export const makeZCFZygote = async (
       displayInfo,
       options,
     );
-    return zcfMintFactory.makeZCFMintInternal(keyword, zoeMint);
+    const issuerRecord = await E(zoeMint).getIssuerRecord();
+    return makeDurableZcfMint(keyword, zoeMint, issuerRecord);
   };
 
   /** @type {ZCFRegisterFeeMint} */
@@ -156,7 +162,8 @@ export const makeZCFZygote = async (
       keyword,
       feeMintAccess,
     );
-    return zcfMintFactory.makeZCFMintInternal(keyword, zoeMint);
+    const issuerRecord = await E(zoeMint).getIssuerRecord();
+    return makeDurableZcfMint(keyword, zoeMint, issuerRecord);
   };
 
   const HandleOfferShape = M.remotable('HandleOffer');
@@ -335,6 +342,7 @@ export const makeZCFZygote = async (
       zcfBaggage,
     ));
 
+    // FIXME get into the prepare
     zcfMintFactory = makeZCFMintFactory(
       zcfBaggage,
       recordIssuer,
