@@ -108,7 +108,7 @@ test('makeNameHubKit - reserve and delete', async t => {
   nameAdmin.reserve('goodbye');
   let lookedUpGoodbye = false;
   const lookupGoodbyeP = nameHub
-    .lookup('bar')
+    .lookup('goodbye')
     .finally(() => (lookedUpGoodbye = true));
 
   t.falsy(lookedUpGoodbye);
@@ -122,7 +122,7 @@ test('makeNameHubKit - reserve and delete', async t => {
   t.deepEqual(nameHub.values(), []);
   t.deepEqual(nameHub.entries(), []);
   await t.throwsAsync(lookupGoodbyeP, {
-    message: /"nameKey" not found: .*/,
+    message: /Value has been deleted/,
   });
   t.truthy(lookedUpGoodbye);
 
