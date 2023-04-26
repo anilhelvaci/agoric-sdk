@@ -59,21 +59,33 @@ export const prepareNameHubKit = (zone = heapZone) => {
     );
   };
 
+  const init1 = () => ({
+    /** @typedef {Partial<PromiseRecord<unknown> & { value: unknown }>} NameRecord */
+    /** @type {LegacyMap<string, NameRecord>} */
+    // Legacy because a promiseKit is not a passable
+    keyToRecord: makeLegacyMap('nameKey'),
+    /** @type {LegacyMap<string, NameRecord>} */
+    // Legacy because a promiseKit is not a passable
+    keyToAdminRecord: makeLegacyMap('nameKey'),
+  });
+  /** @type {WeakMap<any, ReturnType<init1>>} */
+  const ephemera = new WeakMap();
+  const my = me => {
+    if (ephemera.has(me)) {
+      return ephemera.get(me) || assert.fail();
+    }
+
+    const it = init1();
+    ephemera.set(me, it);
+    return it;
+  };
+
   const makeNameHub = zone.exoClassKit(
     'NameHub',
     NameHubIKit,
     () => ({
-      /** @typedef {Partial<PromiseRecord<unknown> & { value: unknown }>} NameRecord */
-      /** @type {LegacyMap<string, NameRecord>} */
-      // Legacy because a promiseKit is not a passable
-      keyToRecord: makeLegacyMap('nameKey'),
-
       /** @type {MapStore<string, unknown>} */
       keyToValue: zone.detached().mapStore('nameKey'),
-
-      /** @type {LegacyMap<string, NameRecord>} */
-      // Legacy because a promiseKit is not a passable
-      keyToAdminRecord: makeLegacyMap('nameKey'),
 
       /** @type {undefined | { entries: (entries: [string, unknown][]) => void }} */
       updateCallback: undefined,
@@ -83,7 +95,7 @@ export const prepareNameHubKit = (zone = heapZone) => {
       nameHub: {
         async lookup(...path) {
           const { nameHub } = this.facets;
-          const { keyToRecord } = this.state;
+          const { keyToRecord } = my(this);
           if (path.length === 0) {
             return nameHub;
           }
@@ -97,7 +109,7 @@ export const prepareNameHubKit = (zone = heapZone) => {
           return E(firstValue).lookup(...remaining);
         },
         entries() {
-          const { keyToRecord } = this.state;
+          const { keyToRecord } = my(this);
           return harden([
             ...mapIterable(
               keyToRecord.entries(),
@@ -110,7 +122,7 @@ export const prepareNameHubKit = (zone = heapZone) => {
           ]);
         },
         values() {
-          const { keyToRecord } = this.state;
+          const { keyToRecord } = my(this);
           return [
             ...mapIterable(
               keyToRecord.values(),
@@ -119,24 +131,28 @@ export const prepareNameHubKit = (zone = heapZone) => {
           ];
         },
         keys() {
-          const { keyToRecord } = this.state;
+          const { keyToRecord } = my(this);
           return harden([...keyToRecord.keys()]);
         },
       },
       /** @type {import('./types').NameAdmin} */
       nameAdmin: {
         async reserve(key) {
-          const { keyToRecord, keyToAdminRecord } = this.state;
+          const { keyToRecord, keyToAdminRecord } = my(this);
+          const { keyToValue } = this.state;
           assert.typeof(key, 'string');
-          for (const map of [keyToAdminRecord, keyToRecord]) {
-            if (!map.has(key)) {
-              map.init(key, makePromiseKit());
-            }
+          if (!keyToAdminRecord.has(key)) {
+            keyToAdminRecord.init(key, makePromiseKit());
+          }
+          if (!keyToRecord.has(key)) {
+            const pk = makePromiseKit();
+            keyToRecord.init(key, pk);
+            pk.promise.then(v => keyToValue.set(key, v));
           }
         },
         default(key, newValue, adminValue) {
           const { nameAdmin } = this.facets;
-          const { keyToRecord } = this.state;
+          const { keyToRecord } = my(this);
           if (keyToRecord.has(key)) {
             const record = keyToRecord.get(key);
             if (!record.promise) {
@@ -149,7 +165,7 @@ export const prepareNameHubKit = (zone = heapZone) => {
         },
         set(key, newValue, adminValue) {
           const { nameAdmin } = this.facets;
-          const { keyToRecord } = this.state;
+          const { keyToRecord } = my(this);
           assert.typeof(key, 'string');
           let record;
           if (keyToRecord.has(key)) {
@@ -167,7 +183,9 @@ export const prepareNameHubKit = (zone = heapZone) => {
           state.updateCallback = fn;
         },
         update(key, newValue, adminValue) {
-          const { keyToRecord, keyToAdminRecord, updateCallback } = this.state;
+          const { keyToRecord, keyToAdminRecord } = my(this);
+          const { keyToValue } = this.state;
+          const { updateCallback } = this.state;
 
           assert.typeof(key, 'string');
           /** @type {[LegacyMap<string, NameRecord>, unknown][]} */
@@ -187,11 +205,16 @@ export const prepareNameHubKit = (zone = heapZone) => {
               map.init(key, record);
             }
           }
+          if (keyToValue.has(key)) {
+            keyToValue.set(key, newValue);
+          } else {
+            keyToValue.init(key, newValue);
+          }
           updated(updateCallback, keyToRecord);
         },
         async lookupAdmin(...path) {
           const { nameAdmin } = this.facets;
-          const { keyToAdminRecord } = this.state;
+          const { keyToAdminRecord } = my(this);
 
           if (path.length === 0) {
             return nameAdmin;
@@ -206,7 +229,8 @@ export const prepareNameHubKit = (zone = heapZone) => {
           return E(firstValue).lookupAdmin(...remaining);
         },
         async delete(key) {
-          const { keyToRecord, keyToAdminRecord, updateCallback } = this.state;
+          const { keyToRecord, keyToAdminRecord } = my(this);
+          const { keyToValue, updateCallback } = this.state;
           for (const map of [keyToAdminRecord, keyToRecord]) {
             if (map.has(key)) {
               // Reject only if already exists.
@@ -219,6 +243,9 @@ export const prepareNameHubKit = (zone = heapZone) => {
                 }
               }
             }
+          }
+          if (keyToValue.has(key)) {
+            keyToValue.delete(key);
           }
           try {
             // This delete may throw.  Reflect it to callers.

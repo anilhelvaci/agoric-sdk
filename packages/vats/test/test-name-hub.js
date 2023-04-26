@@ -1,7 +1,10 @@
 // @ts-check
 import { test } from '@agoric/swingset-vat/tools/prepare-test-env-ava.js';
+import { makeScalarBigMapStore, provide } from '@agoric/vat-data';
+import { makeDurableZone } from '@agoric/zone/durable.js';
 import { E, Far } from '@endo/far';
-import { makeNameHubKit } from '../src/nameHub.js';
+import { prepare } from '../src/mintHolder.js';
+import { makeNameHubKit, prepareNameHubKit } from '../src/nameHub.js';
 
 test('makeNameHubKit - lookup paths', async t => {
   const { nameAdmin: na1, nameHub: nh1 } = makeNameHubKit();
@@ -171,4 +174,24 @@ test('makeNameHubKit - listen for updates', async t => {
     ],
     [['IST', brandIST]],
   ]);
+});
+
+test('durable NameHubKit', async t => {
+  const baggage = makeScalarBigMapStore('test baggage', { durable: true });
+  const zone = makeDurableZone(baggage);
+  const z1 = zone.subZone('z1');
+  const makeKit = prepareNameHubKit(z1);
+
+  // 1st incarnation
+  {
+    const { nameAdmin } = provide(baggage, 'it', makeKit);
+    nameAdmin.update('hello', 'world');
+  }
+
+  // 2nd incarnation
+  {
+    const { nameHub } = provide(baggage, 'it', makeKit);
+    const actual = await nameHub.lookup('hello');
+    t.is(actual, 'world');
+  }
 });
