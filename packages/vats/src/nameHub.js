@@ -148,7 +148,10 @@ export const prepareNameHubKit = (zone = heapZone) => {
           if (!keyToRecord.has(key)) {
             const pk = makePromiseKit();
             keyToRecord.init(key, pk);
-            pk.promise.then(v => keyToValue.set(key, v));
+            pk.promise.then(
+              v => keyToValue.set(key, v),
+              () => {}, // ignore rejections
+            );
           }
         },
         default(key, newValue, adminValue) {
