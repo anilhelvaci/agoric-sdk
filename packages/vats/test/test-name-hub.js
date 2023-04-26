@@ -1,6 +1,6 @@
 // @ts-check
 import { test } from '@agoric/swingset-vat/tools/prepare-test-env-ava.js';
-
+import { E, Far } from '@endo/far';
 import { makeNameHubKit } from '../src/nameHub.js';
 
 test('makeNameHubKit - lookup paths', async t => {
@@ -147,20 +147,22 @@ test('makeNameHubKit - default and set', async t => {
   });
 });
 
-test('makeNameHubKit - listen for updates', t => {
+test('makeNameHubKit - listen for updates', async t => {
   const { nameAdmin } = makeNameHubKit();
 
   const brandBLD = harden({ name: 'BLD' });
   nameAdmin.update('BLD', brandBLD);
 
   const capture = [];
-  nameAdmin.onUpdate(entries => capture.push(entries));
+  nameAdmin.onUpdate(
+    Far('onUpdate', { entries: entries => capture.push(entries) }),
+  );
 
   const brandIST = harden({ name: 'IST' });
-  nameAdmin.update('IST', brandIST);
-  nameAdmin.reserve('AUSD');
+  await E(nameAdmin).update('IST', brandIST);
+  await E(nameAdmin).reserve('AUSD');
 
-  nameAdmin.delete('BLD');
+  await E(nameAdmin).delete('BLD');
 
   t.deepEqual(capture, [
     [
