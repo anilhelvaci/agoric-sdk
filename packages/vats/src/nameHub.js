@@ -46,6 +46,7 @@ export const prepareNameHubKit = (zone = heapZone) => {
     if (!updateCallback) {
       return;
     }
+    // XXX use nameToValue.entries() instead?
     void E(updateCallback).entries(
       harden(
         [
