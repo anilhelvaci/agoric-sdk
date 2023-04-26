@@ -61,6 +61,7 @@ export const prepareNameHubKit = (zone = heapZone) => {
   };
 
   const init1 = () => ({
+    // TODO@@@@ never mind .value here; use the durable store
     /** @typedef {Partial<PromiseRecord<unknown> & { value: unknown }>} NameRecord */
     /** @type {LegacyMap<string, NameRecord>} */
     // Legacy because a promiseKit is not a passable
