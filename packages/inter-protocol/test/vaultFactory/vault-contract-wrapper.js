@@ -33,7 +33,7 @@ const marshaller = makeFakeMarshaller();
 
 /**
  * @param {ZCF} zcf
- * @param {{feeMintAccess: FeeMintAccess}} privateArgs
+ * @param {{ feeMintAccess: FeeMintAccess }} privateArgs
  * @param {import('@agoric/ertp').Baggage} baggage
  */
 export async function start(zcf, privateArgs, baggage) {
