@@ -134,7 +134,7 @@ export async function start(zcf, privateArgs, baggage) {
         getMintFee() {
           return makeRatio(500n, stableBrand, BASIS_POINTS);
         },
-        getStabilityFee() {
+        getInterestRate() {
           return currentInterest;
         },
         getChargingPeriod() {
@@ -199,7 +199,7 @@ export async function start(zcf, privateArgs, baggage) {
     );
   };
 
-  const setStabilityFee = percent => {
+  const setInterestRate = percent => {
     currentInterest = makeRatio(percent, stableBrand);
   };
 
@@ -207,7 +207,7 @@ export async function start(zcf, privateArgs, baggage) {
     advanceRecordingPeriod,
     collateralKit,
     stableMint,
-    setStabilityFee,
+    setInterestRate,
     vault,
   }));
 
