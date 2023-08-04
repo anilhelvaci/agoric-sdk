@@ -10,8 +10,8 @@ install_bundle() {
     --chain-id=agoriclocal -bblock --yes
 }
 
-
-wf=/tmp/b1-c3005df01654266067b7779d6267037d60f5b995c65a5f8c62b89c4ab42495dfe4ce0914d271399321f6f5575453e56c5e4e8faf791336b9c5177e1d7853c361.json
-script=/tmp/b1-5fad04f7560ba9593321df66f4605cba796a2f03643d98044a0d3e8c3b611deb133d7eea003d06fcbb5b5f898bc0ef82b038a18baa740af64f08925e90ff7bb8.json
+# @@@TODO: get these bundle hashes from `agoric run` somehow
+wf=/tmp/b1-7c302e9318ea1d11ddadef057d9b6c3d6181eca886af583da7d93c9475c18da064680996523d6c1d1af3f4a7901f6bdb61fc584c5ae76d8c47cba0d9302258ef.json
+script=/tmp/b1-9a2840e5d2b3e7a4504ff01baff88da8a3285a11cc16ceacb7069a4ccdbafd8daba8c50aae75ad75a71b587b8f3d32d1b93c10c57788395592fe9cefbf055287.json
 install_bundle $wf
-# install_bundle $script
+install_bundle $script
