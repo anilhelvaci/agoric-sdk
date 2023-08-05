@@ -290,7 +290,7 @@
  *       >;
  *       walletFactory: Promise<
  *         Installation<
- *           import('@agoric/smart-wallet/src/walletFactory.js').start
+ *           import('@agoric/smart-wallet/src/walletFactory.js').prepare
  *         >
  *       >;
  *     };

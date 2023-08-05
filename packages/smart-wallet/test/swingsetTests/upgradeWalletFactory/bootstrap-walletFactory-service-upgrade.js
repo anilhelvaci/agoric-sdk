@@ -41,7 +41,7 @@ export const buildRootObject = async () => {
   let wallet;
 
   // for startInstance
-  /** @type {Installation<import('../../../src/walletFactory.js').start>} */
+  /** @type {Installation<import('../../../src/walletFactory.js').prepare>} */
   let installation;
   const terms = {
     agoricNames,

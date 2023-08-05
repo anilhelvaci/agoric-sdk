@@ -24,7 +24,7 @@ export const meta = {
 harden(meta);
 
 /**
- * @type {typeof import('../../../src/walletFactory.js').start}
+ * @type {typeof import('../../../src/walletFactory.js').prepare}
  */
 export const start = async (zcf, privateArgs, baggage) => {
   // copy paste from original contract, with type imports fixed and sayHelloUpgrade method added to creatorFacet)

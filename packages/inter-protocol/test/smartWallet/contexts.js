@@ -71,7 +71,7 @@ export const makeDefaultTestContext = async (t, makeSpace) => {
   );
   /**
    * @type {Promise<
-   *   Installation<import('@agoric/smart-wallet/src/walletFactory.js').start>
+   *   Installation<import('@agoric/smart-wallet/src/walletFactory.js').prepare>
    * >}
    */
   const installation = E(zoe).install(bundle);

@@ -27,9 +27,13 @@ export const meta = {
     { storageNode: M.eref(M.remotable('StorageNode')) },
     { walletBridgeManager: M.eref(M.remotable('walletBridgeManager')) },
   ),
-  upgradability: 'canUpgrade',
+  // UNTIL this compat stuff lands???@@@
+  // upgradability: 'canUpgrade',
 };
 harden(meta);
+
+// advertise privateArgsShape to old Zoe too
+export const privateArgsShape = meta.privateArgsShape;
 
 /**
  * Provide a NameHub for this address and insert depositFacet only if not
@@ -143,7 +147,7 @@ export const makeAssetRegistry = assetPublisher => {
  * }} privateArgs
  * @param {import('@agoric/vat-data').Baggage} baggage
  */
-export const start = async (zcf, privateArgs, baggage) => {
+export const prepare = async (zcf, privateArgs, baggage) => {
   const { agoricNames, board, assetPublisher } = zcf.getTerms();
   const upgrading = baggage.has('walletsByAddress');
 
@@ -306,4 +310,4 @@ export const start = async (zcf, privateArgs, baggage) => {
     creatorFacet,
   };
 };
-harden(start);
+harden(prepare);
