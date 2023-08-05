@@ -145,6 +145,7 @@ export const makeAssetRegistry = assetPublisher => {
  */
 export const start = async (zcf, privateArgs, baggage) => {
   const { agoricNames, board, assetPublisher } = zcf.getTerms();
+  const upgrading = baggage.has('walletsByAddress');
 
   const zoe = zcf.getZoeService();
   const { storageNode, walletBridgeManager, walletReviver } = privateArgs;
@@ -294,7 +295,11 @@ export const start = async (zcf, privateArgs, baggage) => {
   if (walletBridgeManager) {
     // NB: may not be in service when creatorFacet is used, or ever
     // It can't be awaited because that fails vat restart
-    void E(walletBridgeManager).initHandler(handleWalletAction);
+    if (upgrading) {
+      void E(walletBridgeManager).setHandler(handleWalletAction);
+    } else {
+      void E(walletBridgeManager).initHandler(handleWalletAction);
+    }
   }
 
   return {
