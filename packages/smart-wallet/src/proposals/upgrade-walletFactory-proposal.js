@@ -1,9 +1,15 @@
 // @ts-check
 import { E } from '@endo/far';
-
-const WALLET_STORAGE_PATH_SEGMENT = 'wallet';
+import { makeMarshal } from '@endo/marshal';
 
 const { fromEntries, keys, values } = Object;
+const { Fail } = assert;
+
+// vstorage paths under published.*
+const WALLET_STORAGE_PATH_SEGMENT = 'wallet';
+const BOARD_AUX = 'boardAux';
+
+const marshalData = makeMarshal(_val => Fail`data only`);
 
 // borrow zip, allValues from @agoric/interal
 // but don't bring in all of @endo/marshal etc.
@@ -74,6 +80,33 @@ export const upgradeWalletFactory = async (
 };
 harden(upgradeWalletFactory);
 
+/**
+ * @param { BootstrapPowers } powers
+ */
+export const publishAgoricBrandsDisplayInfo = async ({
+  consume: { agoricNames, board, chainStorage },
+}) => {
+  // @ts-expect-error chainStorage is only falsy in testing
+  const boardAux = E(chainStorage).makeChildNode(BOARD_AUX);
+  const publishBrandInfo = async brand => {
+    const [id, displayInfo, allegedName] = await Promise.all([
+      E(board).getId(brand),
+      E(brand).getDisplayInfo(),
+      E(brand).getAllegedName(),
+    ]);
+    const node = E(boardAux).makeChildNode(id);
+    const aux = marshalData.toCapData(harden({ allegedName, displayInfo }));
+    await E(node).setValue(JSON.stringify(aux));
+  };
+
+  /** @type {ERef<NameHub>} */
+  const brandHub = E(agoricNames).lookup('brand');
+  const brands = await E(brandHub).values();
+  // tolerate failure; in particular, for the timer brand
+  await Promise.allSettled(brands.map(publishBrandInfo));
+};
+harden(publishAgoricBrandsDisplayInfo);
+
 /** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
 const manifest = {
   [upgradeWalletFactory.name]: {
@@ -89,6 +122,9 @@ const manifest = {
     instance: {
       consume: { walletFactory: true, provisionPool: true },
     },
+  },
+  [publishAgoricBrandsDisplayInfo.name]: {
+    consume: { agoricNames: true, board: true, chainStorage: true },
   },
 };
 harden(manifest);
