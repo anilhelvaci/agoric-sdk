@@ -1,6 +1,19 @@
-# agoric: run: Deploy script will run with Node.js ESM
-# ...
-# Remember to install bundles before submitting the proposal:
+#!/bin/bash
+
+# Install bundles for walletFactory upgrade
+
+# Defaults are suitable for docker upgrade test context
+SDK=${SDK:-/usr/local/src/agoric-sdk}
+UP11=${UP11:-./upgrade-test-scripts/agoric-upgrade-11}
+# For dev, use something like:
+# $ cd agoric-sdk/packages/deployment/upgrade-test/upgrade-test-scripts/agoric-upgrade-11
+# $ UP11=$PWD SDK=~/projects/agoric-sdk/ ./wf-install-bundles.sh
+
+# If ,wf-run.log already exists, presume the bundles were already built;
+# for example, outside the container.
+[ -f /tmp/,wf-run.log ] || (HOME=/tmp/ agoric run $SDK/packages/smart-wallet/scripts/wfup.js >/tmp/,wf-run.log)
+$UP11/parseProposals.js </tmp/,wf-run.log >/tmp/,wf-run.json
+bundles=$(jq -r '.bundles[]' /tmp/,wf-run.json)
 
 echo +++++ install bundles +++++
 
@@ -10,8 +23,7 @@ install_bundle() {
     --chain-id=agoriclocal -bblock --yes
 }
 
-# @@@TODO: get these bundle hashes from `agoric run` somehow
-wf=/tmp/b1-7c302e9318ea1d11ddadef057d9b6c3d6181eca886af583da7d93c9475c18da064680996523d6c1d1af3f4a7901f6bdb61fc584c5ae76d8c47cba0d9302258ef.json
-script=/tmp/b1-9a2840e5d2b3e7a4504ff01baff88da8a3285a11cc16ceacb7069a4ccdbafd8daba8c50aae75ad75a71b587b8f3d32d1b93c10c57788395592fe9cefbf055287.json
-install_bundle $wf
-install_bundle $script
+for b in $bundles; do 
+  echo installing $b
+  install_bundle $b
+done

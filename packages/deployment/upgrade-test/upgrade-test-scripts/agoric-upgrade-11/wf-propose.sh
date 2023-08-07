@@ -1,18 +1,17 @@
-# agoric: run: Deploy script will run with Node.js ESM
-# bundle-source --to /home/connolly/projects/agoric-sdk/packages/smart-wallet/bundles /home/connolly/projects/agoric-sdk/packages/smart-wallet/src/walletFactory.js walletFactory
-# creating upgrade-walletFactory-permit.json
-# creating upgrade-walletFactory.js
-# You can now run a governance submission command like:
+#!/bin/bash
 
-# . ./upgrade-test-scripts/env_setup.sh
+# Propose and carry out Wallet Factory upgrade
+
 . ../env_setup.sh
 
 TITLE="Add NFT/non-vbank support in WalletFactory"
 
-DESC="Upgrade WalletFactory to support non-vbank assets such as NFTs"
+DESC="Upgrade WalletFactory to support arbitrary ERTP assets such as NFTs"
+
+[ -f ./upgrade-walletFactory-permit.json ] || (echo run wf-install-bundle.sh first ; exit 1)
 
 agd tx gov submit-proposal \
-  swingset-core-eval /tmp/upgrade-walletFactory-permit.json /tmp/upgrade-walletFactory.js \
+  swingset-core-eval ./upgrade-walletFactory-permit.json ./upgrade-walletFactory.js \
     --title="$TITLE" --description="$DESC" \
     --from=validator --keyring-backend=test \
     --deposit=10000000ubld \
@@ -23,7 +22,4 @@ agd --chain-id=agoriclocal query gov proposals --output json | \
   jq -c '.proposals[] | [.proposal_id,.voting_end_time,.status]';
 
 voteLatestProposalAndWait
-
-# Remember to install bundles before submitting the proposal:
-# see wg-install-bundles.sh
 
