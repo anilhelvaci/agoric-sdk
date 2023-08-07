@@ -9,4 +9,4 @@ waitForBlock 5
 upgrade11=./upgrade-test-scripts/agoric-upgrade-11
 
 # zoe vat is at incarnation 0
-test_val "$(yarn --silent node $upgrade11/vat-status.mjs zoe)" "0" "zoe vat incarnation"
+test_val "$(yarn --silent node $upgrade11/tools/vat-status.mjs zoe)" "0" "zoe vat incarnation"
