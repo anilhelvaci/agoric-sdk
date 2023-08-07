@@ -2,7 +2,13 @@
 
 # Propose and carry out Wallet Factory upgrade
 
+UP11=${UP11:-./upgrade-test-scripts/agoric-upgrade-11}
+WFUP=${WFUP:-$UP11/wallet-all-ertp}
+
+cd $WFUP
+
 . ../env_setup.sh
+. ../../env_setup.sh
 
 TITLE="Add NFT/non-vbank support in WalletFactory"
 
@@ -22,4 +28,3 @@ agd --chain-id=agoriclocal query gov proposals --output json | \
   jq -c '.proposals[] | [.proposal_id,.voting_end_time,.status]';
 
 voteLatestProposalAndWait
-
