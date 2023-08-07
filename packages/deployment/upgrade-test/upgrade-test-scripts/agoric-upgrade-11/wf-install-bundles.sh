@@ -12,7 +12,7 @@ UP11=${UP11:-./upgrade-test-scripts/agoric-upgrade-11}
 # If ,wf-run.log already exists, presume the bundles were already built;
 # for example, outside the container.
 [ -f /tmp/,wf-run.log ] || (HOME=/tmp/ agoric run $SDK/packages/smart-wallet/scripts/wfup.js >/tmp/,wf-run.log)
-$UP11/parseProposals.js </tmp/,wf-run.log >/tmp/,wf-run.json
+$UP11/tools/parseProposals.js </tmp/,wf-run.log >/tmp/,wf-run.json
 bundles=$(jq -r '.bundles[]' /tmp/,wf-run.json)
 
 echo +++++ install bundles +++++
