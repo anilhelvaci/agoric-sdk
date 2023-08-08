@@ -174,10 +174,6 @@ export const startGameContract = async permittedPowers => {
   console.error('@@@startGameContract()...');
   const {
     consume: { agoricNames, board, chainStorage, startUpgradable, zoe },
-    installation: {
-      // @ts-expect-error dynamic extension to promise space
-      consume: { game1: installationP },
-    },
     brand: {
       // @ts-expect-error dynamic extension to promise space
       produce: { Place: producePlaceBrand },
@@ -199,8 +195,11 @@ export const startGameContract = async permittedPowers => {
   // NOTE: joinPrice could be configurable
   const terms = { joinPrice: makeAmount(ist.brand, 25n * CENT) };
 
+  // agoricNames gets updated each time; the promise space only once XXXXXXX
+  const installation = await E(agoricNames).lookup('installation', 'game1');
+
   const { instance } = await E(startUpgradable)({
-    installation: await installationP,
+    installation,
     label: 'game1',
     terms,
   });
@@ -212,10 +211,16 @@ export const startGameContract = async permittedPowers => {
 
   console.log('CoreEval script: share via agoricNames:', brand);
 
+  produceInstance.reset();
   produceInstance.resolve(instance);
+
+  producePlaceBrand.reset();
+  producePlaceIssuer.reset();
   producePlaceBrand.resolve(brand);
   producePlaceIssuer.resolve(issuer);
+
   await publishBrandInfo(chainStorage, board, brand);
+  console.log('game1 (re)installed');
 };
 
 /** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
