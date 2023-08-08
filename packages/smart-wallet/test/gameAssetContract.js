@@ -47,13 +47,17 @@ export const start = async zcf => {
 
     totalPlaces(want.Places) <= 3n || Fail`only 3 places allowed when joining`;
 
-    atomicRearrange(
-      zcf,
-      harden([
-        [playerSeat, gameSeat, give],
-        [mint.mintGains(want), playerSeat, want],
-      ]),
-    );
+    playerSeat.decrementBy(gameSeat.incrementBy(give));
+    const tmp = mint.mintGains(want);
+    playerSeat.incrementBy(tmp.decrementBy(want));
+    zcf.reallocate(playerSeat, tmp, gameSeat);
+    // atomicRearrange(
+    //   zcf,
+    //   harden([
+    //     [playerSeat, gameSeat, give],
+    //     [mint.mintGains(want), playerSeat, want],
+    //   ]),
+    // );
     playerSeat.exit(true);
     return 'welcome to the game';
   };
