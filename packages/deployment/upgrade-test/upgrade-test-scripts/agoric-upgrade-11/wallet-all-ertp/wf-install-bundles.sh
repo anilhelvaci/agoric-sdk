@@ -2,17 +2,20 @@
 
 # Install bundles for walletFactory upgrade
 
-# Defaults are suitable for docker upgrade test context
-UP11=${UP11:-./upgrade-test-scripts/agoric-upgrade-11}
-# For dev, use something like:
-# $ cd agoric-sdk/packages/deployment/upgrade-test/upgrade-test-scripts/agoric-upgrade-11
-# $ UP11=.. ./wf-install-bundles.sh
+set -e
 
-# If ,wf-run.log already exists, presume the bundles were already built;
-# for example, outside the container.
-[ -f /tmp/,wf-run.log ] || (HOME=/tmp/ agoric run $SDK/packages/smart-wallet/scripts/wfup.js >/tmp/,wf-run.log)
-$UP11/tools/parseProposals.mjs </tmp/,wf-run.log >/tmp/,wf-run.json
-bundles=$(jq -r '.bundles[]' /tmp/,wf-run.json | sort -u)
+SDK=${SDK:-/usr/src/agoric-sdk}
+UP11=${UP11:-$SDK/upgrade-test-scripts/agoric-upgrade-11}
+
+cd $UP11/wallet-all-ertp
+
+echo +++ run walletFactory upgrade proposal builder +++
+agoric run $SDK/packages/smart-wallet/scripts/wfup.js >/tmp/,run.log
+bundles=$($UP11/tools/parseProposals.mjs </tmp/,run.log | jq -r '.bundles[]' | sort -u )
+
+echo +++ proposal evals for later +++
+/bin/pwd
+ls ./upgrade-walletFactory* ./start-game1*
 
 echo +++++ install bundles +++++
 

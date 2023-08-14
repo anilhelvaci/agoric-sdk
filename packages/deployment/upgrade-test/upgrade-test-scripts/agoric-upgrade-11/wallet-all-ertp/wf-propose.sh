@@ -2,19 +2,26 @@
 
 # Propose and carry out Wallet Factory upgrade
 
-UP11=${UP11:-./upgrade-test-scripts/agoric-upgrade-11}
+set -e
+
+SDK=${SDK:-/usr/src/agoric-sdk}
+UP11=${UP11:-$SDK/upgrade-test-scripts/agoric-upgrade-11}
 WFUP=${WFUP:-$UP11/wallet-all-ertp}
 
 cd $WFUP
 
-. ../env_setup.sh
-. ../../env_setup.sh
+# import voteLatestProposalAndWait
+. $UP11/env_setup.sh
+. $UP11/../env_setup.sh
 
 TITLE="Add NFT/non-vbank support in WalletFactory"
-
 DESC="Upgrade WalletFactory to support arbitrary ERTP assets such as NFTs"
 
-[ -f ./upgrade-walletFactory-permit.json ] || (echo run wf-install-bundle.sh first ; exit 1)
+if [ ! -f ./upgrade-walletFactory-permit.json ]; then
+  file ./upgrade-walletFactory-permit.json
+  echo run wfup.js proposal builder first
+  exit 1
+fi
 
 agd tx gov submit-proposal \
   swingset-core-eval ./upgrade-walletFactory-permit.json ./upgrade-walletFactory.js \
@@ -24,7 +31,7 @@ agd tx gov submit-proposal \
     --gas=auto --gas-adjustment=1.2 \
     --chain-id=agoriclocal --yes -b block -o json
 
-agd --chain-id=agoriclocal query gov proposals --output json | \
+agd query gov proposals --output json | \
   jq -c '.proposals[] | [.proposal_id,.voting_end_time,.status]';
 
 voteLatestProposalAndWait

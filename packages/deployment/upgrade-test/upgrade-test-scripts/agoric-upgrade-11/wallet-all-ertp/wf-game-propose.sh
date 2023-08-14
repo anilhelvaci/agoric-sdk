@@ -2,13 +2,14 @@
 
 # Propose and carry out Wallet Factory upgrade
 
-UP11=${UP11:-./upgrade-test-scripts/agoric-upgrade-11}
+SDK=${SDK:-/usr/src/agoric-sdk}
+UP11=${UP11:-$SDK/upgrade-test-scripts/agoric-upgrade-11}
 WFUP=${WFUP:-$UP11/wallet-all-ertp}
 
 cd $WFUP
 
-. ../env_setup.sh
-. ../../env_setup.sh
+. $SDK/upgrade-test-scripts/env_setup.sh
+. $UP11/env_setup.sh
 
 TITLE="Start Game1 Contract"
 

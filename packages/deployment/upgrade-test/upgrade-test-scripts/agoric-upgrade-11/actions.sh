@@ -1,9 +1,36 @@
 #!/bin/bash
 
-. ./upgrade-test-scripts/env_setup.sh
+set -e
 
-# CWD is agoric-sdk
-upgrade11=./upgrade-test-scripts/agoric-upgrade-11
+SDK=${SDK:-/usr/src/agoric-sdk}
+. $SDK/upgrade-test-scripts/env_setup.sh
+
+upgrade11=$SDK/upgrade-test-scripts/agoric-upgrade-11
+cd $upgrade11
+
+## build proposal and install bundles
+waitForBlock 2
+./tools/mint-ist.sh
+./wallet-all-ertp/wf-install-bundles.sh 
+
+## upgrade wallet factory
+./wallet-all-ertp/wf-propose.sh
+# note brand aux data for more than just vbank assets
+agd query vstorage children published.boardAux # <- move to pretest
+#@@@ agoric follow -lF :published.boardAux.board0257 # <- move to pretest
+
+## start game1
+./wallet-all-ertp/wf-game-propose.sh
+
+# Pay 0.25IST join the game and get some places
+node ./wallet-all-ertp/gen-game-offer.mjs Shire Mordor >/tmp/,join.json
+agops perf satisfaction --from $GOV1ADDR --executeOffer /tmp/,join.json --keyring-backend=test
+agoric follow -lF :published.wallet.$GOV1ADDR.current # <- move to test.sh
+
+# wallet UI can get displayInfo for Place brand
+agoric follow -lF :published.boardAux.board04980 # <- test.sh
+
+cd $SDK
 
 ######################################################################
 # FIXME: remove this line when these tests don't hardcode bundle hashes.
